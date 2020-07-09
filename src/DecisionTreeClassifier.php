@@ -76,7 +76,7 @@ class DecisionTreeClassifier
             }
             $values = array_keys($values);
             if (count($values) < 2) {
-                throw new Exception('Number of labels in dataset less than 2.');
+                return false;
             }
             $this->baseValue = $values[0];
             $this->falseValue = $values[1];
@@ -469,5 +469,36 @@ class DecisionTreeClassifier
         //echo $text;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getTree()
+    {
+        return $this->tree;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBaseKey()
+    {
+        return $this->baseKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBaseValue()
+    {
+        return $this->baseValue;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFalseValue()
+    {
+        return $this->falseValue;
+    }
 
 }
