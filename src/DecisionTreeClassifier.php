@@ -373,9 +373,7 @@ class DecisionTreeClassifier
                 }
             }
         }
-
         $data = $dataSet->getDataSet();
-
         foreach ($multipleParam as $key => $predictionKey) {
             $data = $this->multiplyToBinary($data, $baseKey, $predictionKey);
         }
