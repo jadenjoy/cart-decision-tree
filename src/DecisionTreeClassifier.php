@@ -1,11 +1,12 @@
 <?php
 
 namespace Darvin\CART;
+
 /**
- * Class DecisionTree
+ * Class DecisionTreeClassifier
  * @package Darvin\CART
  */
-class DecisionTree
+class DecisionTreeClassifier
 {
 
     private $binaryVariableData;
@@ -60,7 +61,7 @@ class DecisionTree
      * @param string $falseValue Значение при котором будет возвращено false
      * @return DecisionTreeNode
      */
-    public function classify($baseKey, $baseValue, $falseValue)
+    public function fit($baseKey, $baseValue, $falseValue)
     {
         $this->baseKey = $baseKey;
         $this->baseValue = $baseValue;
@@ -90,9 +91,22 @@ class DecisionTree
      * @param array $target
      * @return mixed
      */
-    public function prognosis(array $target)
+    public function predict(array $target)
     {
-        return $this->executePrognosis($this->tree, $target);
+        return $this->executePrediction($this->tree, $target);
+    }
+
+
+    public function score($dataSet, $reference) {
+        $true = 0;
+        $splitKey = $this->tree->data->splitKey;
+        foreach ($dataSet as $key => $data) {
+            $res = $this->predict($data);
+            if ($reference[$key][$splitKey] == $res) {
+                $true++;
+            }
+        }
+        return $true / count($dataSet);
     }
 
 
@@ -100,7 +114,7 @@ class DecisionTree
      * @param DecisionTreeNode $tree
      * @param array $target
      */
-    public function executePrognosis(DecisionTreeNode $tree, array $target)
+    public function executePrediction(DecisionTreeNode $tree, array $target)
     {
 
 
@@ -172,30 +186,30 @@ class DecisionTree
 
                 if (!(strstr($leftValue, (string) $target[$splitKey]) == false)) {
                     $this->log("LEFT(".$splitKey."|".$leftValue.") > ");
-                    return $this->executePrognosis($tree->left, $target);
+                    return $this->executePrediction($tree->left, $target);
                 } elseif (!(strstr($rightValue, (string) $target[$splitKey]) == false)) {
                     $this->log("RIGHT(".$splitKey."|".$rightValue.") > ");
-                    return $this->executePrognosis($tree->right, $target);
+                    return $this->executePrediction($tree->right, $target);
                 }
                 break;
             case 1:
                 //echo "FLG1 > ";
                 if ($border >= $target[$splitKey]) {
                     $this->log("RIGHT(".$splitKey."|".$rightValue.") > ");
-                    return $this->executePrognosis($tree->right, $target);
+                    return $this->executePrediction($tree->right, $target);
                 } else {
                     $this->log("LEFT(".$splitKey."|".$leftValue.") > ");
-                    return $this->executePrognosis($tree->left, $target);
+                    return $this->executePrediction($tree->left, $target);
                 }
                 break;
             case 2:
                 //echo "FLG2 > ";
                 if ($border >= $target[$splitKey]) {
                     $this->log("LEFT(".$splitKey."|".$leftValue.") > ");
-                    return $this->executePrognosis($tree->left, $target);
+                    return $this->executePrediction($tree->left, $target);
                 } else {
                     $this->log("RIGHT(".$splitKey."|".$rightValue.") > ");
-                    return $this->executePrognosis($tree->right, $target);
+                    return $this->executePrediction($tree->right, $target);
                 }
                 break;
             default:
@@ -205,7 +219,14 @@ class DecisionTree
     }
 
 
-
+    /**
+     * @param $binaryData
+     * @param $baseKey
+     * @param $baseValue
+     * @param $splitKey
+     * @param $splitValue
+     * @return DecisionTreeNode
+     */
     private function makeDecisionTree($binaryData, $baseKey, $baseValue, $splitKey, $splitValue)
     {
 
@@ -238,7 +259,6 @@ class DecisionTree
             return $dtNode;
         }
 
-        //TODO: проверить почему age пустой
         $splitKey = array_keys($deltaIArray, max($deltaIArray));
         $splitArray = ArrayHelper::splitByPredictionKey($binaryData, $splitKey[0]);
 
@@ -262,7 +282,11 @@ class DecisionTree
     }
 
 
-
+    /**
+     * @param array $rawData
+     * @param string $baseKey
+     * @return array|mixed
+     */
     public function makeBinaryVariableData(array $rawData, string $baseKey)
     {
         // Строковые параметры
@@ -347,6 +371,12 @@ class DecisionTree
     }
 
 
+    /**
+     * @param array $rawData
+     * @param string $baseKey
+     * @param string $predictionKey
+     * @return mixed
+     */
     public function continuousToBinary(array $rawData, string $baseKey, string $predictionKey)
     {
         $featArray = ArrayHelper::makeFeatArray($rawData, $predictionKey);

@@ -51,12 +51,21 @@ class DataSet
     }
 
 
+    /**
+     * @param $dataSet
+     * @return array
+     */
     public function extractFeatures($dataSet)
     {
         $dataSet = array_values($dataSet);
         return array_keys($dataSet[0]);
     }
 
+
+    /**
+     * @param $dataSet
+     * @param $keys
+     */
     public function extractFeatArrays($dataSet, $keys)
     {
         foreach ($keys as $key) {
@@ -64,6 +73,10 @@ class DataSet
         }
     }
 
+    /**
+     * @param $key
+     * @return mixed
+     */
     public function feat($key)
     {
         return $this->featArrays[$key];

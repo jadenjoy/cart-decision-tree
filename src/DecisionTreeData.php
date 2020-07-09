@@ -16,6 +16,14 @@ class DecisionTreeData
     public $splitValue;
 
 
+    /**
+     * DecisionTreeData constructor.
+     * @param $data
+     * @param $baseKey
+     * @param $value
+     * @param null $splitKey
+     * @param null $splitValue
+     */
     public function __construct($data, $baseKey, $value, $splitKey = null, $splitValue = null)
     {
 
