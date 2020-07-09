@@ -74,6 +74,9 @@ class DecisionTreeClassifier
                 }
             }
             $values = array_keys($values);
+            if ($values < 2) {
+                throw new Error('Number of labels in dataset less than 2.');
+            }
             $this->baseValue = $values[0];
             $this->falseValue = $values[1];
         } else {
