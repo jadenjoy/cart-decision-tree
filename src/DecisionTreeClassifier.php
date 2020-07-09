@@ -44,6 +44,8 @@ class DecisionTreeClassifier
     private $tree;
 
 
+    public $maxLeafNumber = 20;
+
     /**
      * DecisionTree constructor.
      *
@@ -93,7 +95,8 @@ class DecisionTreeClassifier
             $this->baseKey,
             $this->baseValue,
             $this->baseKey,
-            $this->baseValue
+            $this->baseValue,
+            $this->maxLeafNumber
         );
 
 
@@ -247,10 +250,10 @@ class DecisionTreeClassifier
      * @param $splitValue
      * @return DecisionTreeNode
      */
-    private function makeDecisionTree($binaryData, $baseKey, $baseValue, $splitKey, $splitValue)
+    private function makeDecisionTree($binaryData, $baseKey, $baseValue, $splitKey, $splitValue, $maxLeafNumber = 10, $leafNumber = 0)
     {
 
-
+        //       echo $leafNumber.">".$baseKey."\n";
         $deltaIArray = [];
         $dtNode = new DecisionTreeNode();
         $dtData = new DecisionTreeData($binaryData, $baseKey, $baseValue, $splitKey, $splitValue);
@@ -259,18 +262,29 @@ class DecisionTreeClassifier
 
         $keys = array_keys($binaryData[0]);
 
+
+//        echo "FOREACH\n";
         foreach ($keys as $k => $key) {
-            if ($key == $baseKey) {
+
+            if ($key == $baseKey & $leafNumber <= $maxLeafNumber) {
                 continue;
             }
             $deltaIArray[$key] = CART::calculateDeltaI($binaryData, $baseKey, $key);
         }
 
+//        echo "END FOREACH\n";
         $flg = 0;
+
+//        echo "FLG:".$flg."\n";
+
+
 
         foreach ($deltaIArray as $key => $value) {
             if ($value != 0.0) {
+                //               echo $key."!=".$value."\n";
                 $flg = 1;
+            } else {
+//                echo $key."==".$value."\n";
             }
         }
 
@@ -287,10 +301,26 @@ class DecisionTreeClassifier
         foreach ($splitArray as $key => $value) {
             switch ($i) {
                 case 0:
-                    $dtNode->left = $this->makeDecisionTree($value, $baseKey, $baseValue, $splitKey[0], $key);
+                    $dtNode->left = $this->makeDecisionTree(
+                        $value,
+                        $baseKey,
+                        $baseValue,
+                        $splitKey[0],
+                        $key,
+                        $maxLeafNumber,
+                        $leafNumber + 1
+                    );
                     break;
                 case 1:
-                    $dtNode->right = $this->makeDecisionTree($value, $baseKey, $baseValue, $splitKey[0], $key);
+                    $dtNode->right = $this->makeDecisionTree(
+                        $value,
+                        $baseKey,
+                        $baseValue,
+                        $splitKey[0],
+                        $key,
+                        $maxLeafNumber,
+                        $leafNumber + 1
+                    );
                     break;
                 default:
                     break;
@@ -331,10 +361,15 @@ class DecisionTreeClassifier
 
             // Заполняем строковые и числовые пармаетры
             if (count($featArray) >= 3) {
-                if (is_numeric($featArray[0])) {
-                    array_push($continuousParam, $key);
-                } else {
-                    array_push($multipleParam, $key);
+                foreach ($featArray as $fkey => $fvalue) {
+                    if ($fvalue != '') {
+                        if (is_numeric($featArray[$fkey])) {
+                            array_push($continuousParam, $key);
+                        } else {
+                            array_push($multipleParam, $key);
+                        }
+                        break;
+                    }
                 }
             }
         }
