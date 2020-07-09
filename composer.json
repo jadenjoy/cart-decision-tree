@@ -1,0 +1,19 @@
+{
+    "name": "darvin/cart-decision-tree",
+    "description": "Classification and Regression Tree",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tundaikin Konstantin",
+            "email": "edeminteractive@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Darvin\\CART\\": "src/"
+        }
+    }
+}
