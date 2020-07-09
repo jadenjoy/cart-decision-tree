@@ -61,16 +61,28 @@ class DecisionTreeClassifier
      * @param string $falseValue Значение при котором будет возвращено false
      * @return DecisionTreeNode
      */
-    public function fit($baseKey, $baseValue, $falseValue)
+    public function fit($baseKey, $baseValue = null, $falseValue = null)
     {
+        $values = [];
+        if (is_null($baseKey) || is_null($falseValue)) {
+            foreach ($this->data as $item) {
+                if (!isset($values[$item[$baseKey]])) {
+                    $values[$item[$baseKey]] = $item[$baseKey];
+                }
+                if (count($values) == 2) {
+                    break;
+                }
+            }
+            $values = array_keys($values);
+            $this->baseValue = $values[0];
+            $this->falseValue = $values[1];
+        } else {
+            $this->baseValue = $baseValue;
+            $this->falseValue = $falseValue;
+        }
         $this->baseKey = $baseKey;
-        $this->baseValue = $baseValue;
-        $this->falseValue = $falseValue;
-
 
         $this->binaryVariableData = $this->makeBinaryVariableData($this->data, $baseKey);
-
-
 
         $decisionTree = $this->makeDecisionTree(
             $this->binaryVariableData,
@@ -97,8 +109,12 @@ class DecisionTreeClassifier
     }
 
 
-    public function score($dataSet, $reference) {
+    public function score($dataSet, $reference = null)
+    {
         $true = 0;
+        if (is_null($reference)) {
+            $reference = $dataSet;
+        }
         $splitKey = $this->tree->data->splitKey;
         foreach ($dataSet as $key => $data) {
             $res = $this->predict($data);
@@ -295,8 +311,6 @@ class DecisionTreeClassifier
         // Числовые параметры
         $continuousParam = [];
 
-        $deltaIArray 	= [];
-
         // Датасет
         $dataSet = new DataSet($rawData);
         // Ключи массива датасета
@@ -347,7 +361,7 @@ class DecisionTreeClassifier
 
         $featArray = ArrayHelper::makeFeatArray($rawData, $predictionKey);
         $combinations = ListingCombination::combinations($featArray);
-
+        $deltaIArray = [];
 
         foreach ($combinations as $key => $combination) {
             $tmpData = $this->toBinary($rawData, $predictionKey, $combination, 'type1', 'type2');
