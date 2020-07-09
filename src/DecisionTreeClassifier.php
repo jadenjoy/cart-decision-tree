@@ -46,6 +46,9 @@ class DecisionTreeClassifier
 
     public $maxLeafNumber = 20;
 
+
+    private $featuresDeltaI = [];
+
     /**
      * DecisionTree constructor.
      *
@@ -153,12 +156,12 @@ class DecisionTreeClassifier
             if ($trueNum > $falseNum) {
                 $pars = $trueNum / ($trueNum + $falseNum);
                 //echo "PARS:" . $pars . "|";
-                $this->log("END\n");
+                $this->log("END - ".$this->baseValue."\n");
                 return $this->baseValue;
             } else {
                 $pars = $falseNum / ($trueNum + $falseNum);
                 //echo "PARS:" . $pars . "|";
-                $this->log("END\n");
+                $this->log("END - ".$this->falseValue."\n");
                 return $this->falseValue;
             }
 
@@ -265,11 +268,13 @@ class DecisionTreeClassifier
 
 //        echo "FOREACH\n";
         foreach ($keys as $k => $key) {
-
             if ($key == $baseKey & $leafNumber <= $maxLeafNumber) {
                 continue;
             }
             $deltaIArray[$key] = CART::calculateDeltaI($binaryData, $baseKey, $key);
+        }
+        if ($leafNumber == 0) {
+            $this->featuresDeltaI = $deltaIArray;
         }
 
 //        echo "END FOREACH\n";
@@ -472,6 +477,32 @@ class DecisionTreeClassifier
 
 
     /**
+     * @param $file
+     */
+    public function saveTree($file)
+    {
+        $data = [
+            'baseKey' => $this->baseKey,
+            'baseValue' => $this->baseValue,
+            'falseValue' => $this->falseValue,
+            'tree' => $this->tree,
+            'featuresDeltaI' => $this->featuresDeltaI
+        ];
+        file_put_contents($file, serialize($data));
+    }
+
+    public function loadTree($file)
+    {
+        $data = unserialize(file_get_contents($file));
+        $this->tree = $data['tree'];
+        $this->baseValue = $data['baseValue'];
+        $this->falseValue = $data['falseValue'];
+        $this->baseKey = $data['baseKey'];
+        $this->featuresDeltaI = $data['featuresDeltaI'];
+    }
+
+
+    /**
      * @param array $rawData
      * @param string $predictionKey
      * @param array $combination
@@ -499,7 +530,7 @@ class DecisionTreeClassifier
 
 
     public function log($text) {
-        //echo $text;
+       // echo $text;
     }
 
     /**
@@ -532,6 +563,15 @@ class DecisionTreeClassifier
     public function getFalseValue()
     {
         return $this->falseValue;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getFeaturesDeltaI(): array
+    {
+        return $this->featuresDeltaI;
     }
 
 }
