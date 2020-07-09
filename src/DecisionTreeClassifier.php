@@ -1,6 +1,7 @@
 <?php
 
 namespace Darvin\CART;
+use League\Csv\Exception;
 
 /**
  * Class DecisionTreeClassifier
@@ -75,7 +76,7 @@ class DecisionTreeClassifier
             }
             $values = array_keys($values);
             if (count($values) < 2) {
-                throw new Error('Number of labels in dataset less than 2.');
+                throw new Exception('Number of labels in dataset less than 2.');
             }
             $this->baseValue = $values[0];
             $this->falseValue = $values[1];
